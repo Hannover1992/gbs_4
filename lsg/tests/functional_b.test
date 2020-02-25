@@ -1,0 +1,34 @@
+--- !inherit base.test
+--- !python clash compiles
+exe = Compilation().compile()
+import os
+import logging
+
+
+
+--- !python prompt changes on cd <some dir>
+cwd = os.getcwd()
+stdin = "cd {}/..\ncd {}\n cd /proc\n".format(cwd, exe.tmpdir)
+stdout, stderr = exe.run(input=stdin)
+soll = '{}:\n{}:\n{}'.format(cwd, exe.tmpdir, "/proc")
+if exe.tmpdir not in stderr or cwd not in stderr or "/proc" not in stderr:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("expected stderr:\n{}".format(soll))
+    logging.info("actual stderr:\n{}".format(stderr))
+    raise RuntimeError("stderr does not contain expected prompt")
+
+--- !python cd is implemented (cd /proc)
+cwd = os.getcwd()
+stdin = "cd /proc\n"
+stdout, stderr, syscalls = exe.strace("chdir", input=stdin)
+found = False
+for s in syscalls:
+    if 'chdir("/proc")' in s:
+        found = True
+if not found:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("actual stderr:\n{}".format(stderr))
+    logging.info("actual syscalls:\n" + "".join(syscalls[1:]))
+    raise RuntimeError('your program does not execute a chdir("/proc") syscall')

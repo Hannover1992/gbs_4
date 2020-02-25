@@ -1,0 +1,67 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ATTR	._clash.c	/^/;"	v
+ATTR	._plist.c	/^/;"	v
+ATTR	._plist.h	/^/;"	v
+ATTR	._plist_walklist.c	/^/;"	v
+CC	Makefile	/^CC		= gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS  = -std=c11 -pedantic -D_XOPEN_SOURCE=700 -Wall -Werror$/;"	m
+Compilation	tests/unittest.py	/^class Compilation:$/;"	c
+GDB_SCRIPT_TRACE	tests/unittest.py	/^GDB_SCRIPT_TRACE = os.path.join(SCRIPT_ROOT, "gdb_trace.py")$/;"	v
+LDFLAGS	Makefile	/^LDFLAGS =$/;"	m
+PLIST_H	plist.h	2;"	d
+SCRIPT_ROOT	tests/unittest.py	/^SCRIPT_ROOT = os.path.dirname(__file__)$/;"	v
+Testcase	tests/unittest.py	/^class Testcase:$/;"	c
+Trace	tests/unittest.py	/^class Trace:$/;"	c
+__compile	tests/unittest.py	/^    def __compile(self, flags=[], remap=None):$/;"	m	class:Compilation	file:
+__init__	tests/unittest.py	/^    def __init__(self, after_main = None, before_main=None, source_files=None):$/;"	m	class:Compilation
+__init__	tests/unittest.py	/^    def __init__(self, records):$/;"	m	class:Trace
+__init__	tests/unittest.py	/^    def __init__(self, testcase):$/;"	m	class:Testcase
+__run	tests/unittest.py	/^    def __run(self, args = [], cmd_prefix = [], input=None, **kwargs):$/;"	m	class:Compilation	file:
+args	tests/unittest.py	/^    args = parser.parse_args()$/;"	v
+block_inherit	tests/unittest.py	/^    def block_inherit(self, block, other_testcase):$/;"	m	class:Testcase
+block_nop	tests/unittest.py	/^    def block_nop(self, *args, **kwargs):$/;"	m	class:Testcase
+block_python	tests/unittest.py	/^    def block_python(self, block, *args):$/;"	m	class:Testcase
+block_source	tests/unittest.py	/^    def block_source(self, block, variable):$/;"	m	class:Testcase
+block_yaml	tests/unittest.py	/^    def block_yaml(self, block):$/;"	m	class:Testcase
+buffer_size	clash2.c	/^int buffer_size;$/;"	v
+cd	clash2.c	/^void cd(char* dir)$/;"	f
+cleanup	tests/unittest.py	/^    def cleanup(self):$/;"	m	class:Compilation
+cmdLine	plist.c	/^	char *cmdLine;$/;"	m	struct:qel	file:
+cmdLine	plist_walklist.c	/^	char *cmdLine;$/;"	m	struct:qel	file:
+colors	clash2.c	/^char* colors[] = {"\\x1B[0m", "\\x1B[31m", "\\x1B[32m", "\\x1B[33m", "\\x1B[34m", "\\x1B[35m", "\\x1B[36m"};$/;"	v
+compile	tests/unittest.py	/^    def compile(self, flags=[], remap=None):$/;"	m	class:Compilation
+execute	clash2.c	/^void execute(char* arguments[], int AMOUNT_OF_ARGUMENTS, int sleep, char* cmd_cpy)$/;"	f
+fail_marker	tests/unittest.py	/^    def fail_marker(self, marker, msg):$/;"	m	class:Compilation
+function_called	tests/unittest.py	/^    def function_called(self, name):$/;"	m	class:Trace
+getwd	clash2.c	/^void getwd()$/;"	f
+globals	tests/unittest.py	/^    globals = None$/;"	v	class:Compilation
+head	plist.c	/^} *head;$/;"	v	typeref:struct:qel
+insertElement	plist.c	/^int insertElement(pid_t pid, const char *cmdLine) {$/;"	f
+instances	tests/unittest.py	/^    instances = []$/;"	v	class:Compilation
+load	tests/unittest.py	/^    def load(self, content, execute=False):$/;"	m	class:Testcase
+main	clash2.c	/^int main(void)$/;"	f
+next	plist.c	/^	struct qel *next;$/;"	m	struct:qel	typeref:struct:qel::qel	file:
+next	plist_walklist.c	/^	struct qel *next;$/;"	m	struct:qel	typeref:struct:qel::qel	file:
+no_strace	tests/unittest.py	/^    no_strace = False$/;"	v	class:Compilation
+parser	tests/unittest.py	/^    parser = argparse.ArgumentParser(description='GBS Testcase Tool.')$/;"	v
+parsing_arguments	clash2.c	/^void parsing_arguments(char* cmd)$/;"	f
+pid	plist.c	/^	pid_t pid;$/;"	m	struct:qel	file:
+pid	plist_walklist.c	/^	pid_t pid;$/;"	m	struct:qel	file:
+print_sleep	clash2.c	/^int print_sleep(pid_t zombie_pid, const char* command)$/;"	f
+qel	plist.c	/^struct qel {$/;"	s	file:
+qel	plist_walklist.c	/^extern struct qel {$/;"	s	file:
+red	tests/unittest.py	/^def red(msg):$/;"	f
+removeElement	plist.c	/^int removeElement(pid_t pid, char *buf, size_t buflen) {$/;"	f
+results	tests/unittest.py	/^    results = []$/;"	v
+run	clash2.c	/^void run() {$/;"	f
+run	tests/unittest.py	/^    def run(self, args = [], cmd_prefix = [],$/;"	m	class:Compilation
+strace	tests/unittest.py	/^    def strace(self, syscalls=None, **kwargs):$/;"	m	class:Compilation
+trace	tests/unittest.py	/^    def trace(self, functions, **kwargs):$/;"	m	class:Compilation
+walkList	plist_walklist.c	/^void walkList( int (*callback) (pid_t, const char *) ) {$/;"	f
+walk_jobs	clash2.c	/^int walk_jobs(pid_t zombie_pid, const char* command)$/;"	f
+wd	clash2.c	/^char* wd;$/;"	v

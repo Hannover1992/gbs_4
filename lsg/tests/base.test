@@ -1,0 +1,13 @@
+--- !yaml
+sources:
+  plist.h: {}
+  plist.c: {}
+  plist_walklist.c: {}
+  clash.c:
+    main: true
+cflags: [-std=c11, -D_XOPEN_SOURCE=700, -Wall, -Werror, -pedantic, -g, -ggdb]
+
+--- !python
+# First we compile the students solution with the given main
+Compilation().compile()
+

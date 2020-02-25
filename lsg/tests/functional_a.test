@@ -1,0 +1,107 @@
+--- !inherit base.test
+--- !python clash compiles
+exe = Compilation().compile()
+import os
+import logging
+
+--- !python stderr contains the prompt (<cwd>:)
+pid = os.getpid()
+stdin = "\n".format(pid)
+stdout, stderr = exe.run(input=stdin, cwd=exe.tmpdir)
+soll = '{}:'.format(exe.tmpdir)
+if exe.tmpdir not in stderr:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("expected stderr:\n{}".format(soll))
+    logging.info("actual stderr:\n{}".format(stderr))
+    raise RuntimeError("stderr does not contain expected prompt")
+
+--- !python execute echo <pid>
+pid = os.getpid()
+stdin = "echo pid: {}\n".format(pid)
+stdin += "echo flag: {{{FINISHED}}}\n"
+stdout, stderr = exe.run(input=stdin)
+soll = 'pid: <pid>\nflag:{{{ here be a flag }}}'
+if str(pid) not in stdout:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("expected stout:\n{}".format(soll))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("actual stderr:\n{}".format(stderr))
+    raise RuntimeError("stdout does not contain expected echo printout")
+
+
+--- !python exit status line
+stdin = 'bash -c abort\n'
+stdout, stderr = exe.run(input=stdin)
+soll = "Exitstatus [bash -c abort] = 127"
+if not soll in stderr:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("expected stderr:\n{}".format(soll))
+    logging.info("actual stderr:\n{}".format(stderr))
+    raise RuntimeError("The stderr does not contain the exit status line.")
+
+
+--- !python execute multiple commands
+stdin = "echo foo {}\n".format(pid)
+stdin += "echo flag: {{{FINISHED}}}\n"
+stdout, stderr, syscalls = exe.strace(syscalls="execve", input=stdin)
+soll = 'pid: <pid>\nflag:{{{ here be a flag }}}'
+
+e1, e2 = False, False
+for syscall in syscalls:
+    if '["echo", "foo", "{}"]'.format(pid) in syscall:
+        e1 = True
+    if '["echo", "flag:",' in syscall:
+        e2 = True
+
+if not (e1 and e2):
+    logging.info("input:\n{}".format(stdin))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("actual stderr:\n{}".format(stderr))
+    logging.info("actual syscalls:\n" + "".join(syscalls))
+    raise RuntimeError("your program does not execute the expected exec syscalls")
+
+
+--- !python empty commandline
+pid = os.getpid()
+stdin = "\n\n".format(pid)
+stdout, stderr, syscalls = exe.strace("execve,fork,chdir", input=stdin)
+if len(syscalls) != 1: # first execve is the invocation of the clash by the test
+    logging.info("input:\n{}".format(stdin))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("actual stderr:\n{}".format(stderr))
+    logging.info("actual syscalls:\n" + "".join(syscalls[1:]))
+    raise RuntimeError("An empty commandline should neither fork nor exec. You called the above listed syscalls.")
+
+--- !python commandline longer than sysconf _SC_LINE_MAX
+line_max = os.sysconf("SC_LINE_MAX")
+pid = os.getpid()
+longline = "".join(["x" for i in range(line_max)])
+stdin = "echo pid: {} {}\n".format(pid, longline)
+stdin += "echo flag: {{{FINISHED}}}\n"
+stdout, stderr = exe.run(input=stdin)
+soll = 'flag:{{{ here be a flag }}}'
+if "pid: " + str(pid) in stdout:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("expected stout:\n{}".format(soll))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("actual stderr:\n{}".format(stderr))
+    raise RuntimeError("The commandline containing the pid is longer than the sysconf limit. Therefore, it must not be executed")
+
+--- !python commandline exactly as long as allowed by sysconf _SC_LINE_MAX
+line_max = os.sysconf("SC_LINE_MAX")
+pid = os.getpid()
+stdin = "echo pid: {} ".format(pid)
+longline = "".join(["x" for i in range(line_max-len(stdin)-1)])
+stdin += longline + '\n'
+stdin += "echo flag: {{{FINISHED}}}\n"
+stdout, stderr = exe.run(input=stdin)
+soll = 'pid: {} {}\n'.format(pid, longline)
+soll += 'flag:{{{ here be a flag }}}'
+if "pid: " + str(pid) not in stdout:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("expected stout:\n{}".format(soll))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("actual stderr:\n{}".format(stderr))
+    raise RuntimeError("The commandline containing the pid is NOT longer than the sysconf limit. Therefore, it shall be executed")

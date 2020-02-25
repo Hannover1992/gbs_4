@@ -1,0 +1,71 @@
+--- !inherit base.test
+--- !python clash compiles
+exe = Compilation().compile()
+import os
+import logging
+
+
+
+--- !python run program in background
+cwd = os.getcwd()
+stdin = "echo 1\nsleep 0.5 &\necho 3\nsleep 1\n".format(cwd, exe.tmpdir)
+stdout, stderr = exe.run(input=stdin)
+soll = '{}:\n{}:\n{}'.format(cwd, exe.tmpdir, "/proc")
+e3line = -1
+s05line = -1
+for idx, line in enumerate(stderr.strip().split('\n')):
+    if "[echo 3]" in line:
+        e3line = idx
+    elif "[sleep 0.5 &]" in line:
+        s05line = idx
+
+if e3line ==-1 or s05line ==-1:
+    raise RuntimeError('Exitstatus lines not found')
+if s05line < e3line:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("expected stderr:\n{}".format(soll))
+    logging.info("actual stderr:\n{}".format(stderr))
+    raise RuntimeError('"echo 3" did not terminate before "sleep 0.5 &". This indicates sleep was not run in background')
+
+--- !python correct waitpid calls for background programms
+cwd = os.getcwd()
+stdin = "echo 1 &\n"
+stdout, stderr, syscalls = exe.strace("wait4", input=stdin)
+found = False
+for s in syscalls:
+    if "wait4" in s and not "WNOHANG" in s:
+        logging.info("input:\n{}".format(stdin))
+        logging.info("actual stdout:\n{}".format(stdout))
+        logging.info("actual stderr:\n{}".format(stderr))
+        logging.info("actual syscalls:\n" + "".join(syscalls))
+        raise RuntimeError('your program does not execute the non-hanging wait() call')
+
+--- !python correct waitpid calls for foreground programms
+cwd = os.getcwd()
+stdin = "echo 1\n"
+stdout, stderr, syscalls = exe.strace("wait4", input=stdin)
+found = False
+for s in syscalls:
+    if "wait4" in s and not "WNOHANG" in s:
+        found = True
+if not found:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("actual stderr:\n{}".format(stderr))
+    logging.info("actual syscalls:\n" + "".join(syscalls))
+    raise RuntimeError('your program does not execute a blocking wait() call')
+
+
+
+--- !python collect childs on newline
+cwd = os.getcwd()
+stdin = "echo 1 &\n\n\n"
+stdout, stderr, syscalls = exe.strace("wait4", input=stdin)
+found = False
+if len(syscalls) == 0:
+    logging.info("input:\n{}".format(stdin))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("actual stderr:\n{}".format(stderr))
+    logging.info("actual syscalls:\n" + "".join(syscalls))
+    raise RuntimeError('your program does not wait for childs on newline')

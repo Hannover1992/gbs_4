@@ -1,0 +1,44 @@
+--- !inherit base.test
+--- !python clash compiles
+exe = Compilation().compile()
+import os
+import logging
+
+
+
+--- !python jobs
+cwd = os.getcwd()
+stdin = "sleep 0.2 &\nsleep 0.1 &\njobs\n"
+stdout, stderr, syscalls = exe.strace("execve", input=stdin)
+found = False
+s1pid = -1
+s2pid = -1
+for syscall in syscalls:
+    if '["sleep", "0.1"]' in syscall:
+        s1pid = syscall.split(" ")[0]
+    elif '["sleep", "0.2"]' in syscall:
+        s2pid = syscall.split(" ")[0]
+
+if s2pid == -1 or  s1pid == -1:
+    logging.info("actual syscalls:\n" + "".join(syscalls[1:]))
+    raise RuntimeError("Could not find exec syscalls. Are you ready for task c? If not ignore this testcase.")
+
+s1found = False
+s2found = False
+for idx, l in enumerate(stdout.strip().split("\n")):
+    if "sleep" in l:
+        if "0.1" in l and s1pid in l:
+            s1found = True
+        if "0.2" in l and s2pid in l:
+            s2found = True
+
+soll = '''[{p1}] {c1}\n[{p2}] {c2}\n'''.format(p1=s1pid, p2=s2pid,
+                                               c1="sleep 0.1 &",
+                                               c2="sleep 0.2 &")
+if not (s1found and s2found):
+    logging.info("input:\n{}".format(stdin))
+    logging.info("expected stdout:\n{}".format(soll))
+    logging.info("actual stdout:\n{}".format(stdout))
+    logging.info("actual stderr:\n{}".format(stderr))
+    raise RuntimeError('jobs statuslines not found')
+

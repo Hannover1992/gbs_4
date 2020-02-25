@@ -1,0 +1,15 @@
+--- !inherit base.test
+--- !python
+exe = Compilation().compile()
+exe.run(cmd_prefix=['valgrind', '--version'])
+try:
+    pass
+except:
+    import logging
+    logging.warning("Valgrind is not installed on your system, skipping valgrind test")
+else:
+    try:
+        stdin = b"echo {{{FINISHED}}}\necho foo\nfind ../../\necho bar\n"
+        exe.run(cmd_prefix=['valgrind', "-q", "--error-exitcode=1", "--leak-check=full",], input=stdin)
+    except RuntimeError:
+        exe.fail_marker(1, "Valgrind did not terminate as expected. Reasons may be 'Memory Leak Detected' or your code used exit() wit a non zero exit code")

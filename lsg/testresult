@@ -1,0 +1,25 @@
+[1;34mINFO[1;0m:root:Testcase: tests/base.test
+[1;34mINFO[1;0m:root:Testcase: tests/functional_a.test
+[1;34mINFO[1;0m:root:... Subtest: clash compiles
+[1;34mINFO[1;0m:root:... Subtest: stderr contains the prompt (<cwd>:)
+[1;34mINFO[1;0m:root:... Subtest: execute echo <pid>
+[1;34mINFO[1;0m:root:... Subtest: exit status line
+[1;34mINFO[1;0m:root:... Subtest: execute multiple commands
+[1;34mINFO[1;0m:root:... Subtest: empty commandline
+[1;34mINFO[1;0m:root:... Subtest: commandline longer than sysconf _SC_LINE_MAX
+[1;34mINFO[1;0m:root:... Subtest: commandline exactly as long as allowed by sysconf _SC_LINE_MAX
+[1;34mINFO[1;0m:root:Testcase: tests/functional_b.test
+[1;34mINFO[1;0m:root:... Subtest: clash compiles
+[1;34mINFO[1;0m:root:... Subtest: prompt changes on cd <some dir>
+[1;34mINFO[1;0m:root:... Subtest: cd is implemented (cd /proc)
+[1;34mINFO[1;0m:root:Testcase: tests/functional_c.test
+[1;34mINFO[1;0m:root:... Subtest: clash compiles
+[1;34mINFO[1;0m:root:... Subtest: run program in background
+[1;34mINFO[1;0m:root:... Subtest: correct waitpid calls for background programms
+[1;34mINFO[1;0m:root:... Subtest: correct waitpid calls for foreground programms
+[1;34mINFO[1;0m:root:... Subtest: collect childs on newline
+[1;34mINFO[1;0m:root:Testcase: tests/functional_d.test
+[1;34mINFO[1;0m:root:... Subtest: clash compiles
+[1;34mINFO[1;0m:root:... Subtest: jobs
+[1;34mINFO[1;0m:root:Testcase: tests/valgrind.test
+success

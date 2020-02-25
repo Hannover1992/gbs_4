@@ -1,0 +1,85 @@
+4.1.1) Theoriefragen
+
+1.) a)
+Der Befehl fork() erstellt ein Child Prozess mit neuer PID, der das Gleiche tut, wie der Parent Prozess. 
+Das bedeutet, dass nach jedem for Durchlauf immer doppelt so viele Prozesse vorliegen, die fork() aufrufen, als davor.
+
+Insgesamt hat man also 2^n (n = Anzahl an Durchläufen der for Schleife) parallel ausgeführte Prozesse. 
+
+1.) b)
+
+Durch das Klonen der eigenen Prozesse in der for-schleife vervielfältigt sich der Prozess mit der Geschwindigkeit 2^n pro Ausgeführter for schleife (Hier: Generation).
+
+Dadurch enstehen unendlich viele Prozesse, wodurch die gegebenen begrenzten Ressourcen der Hardware (CPU, RAM, etc.) sehr schnell erschöpft werden und das gesamte Betriebsystem und die anderen Prozesse verlangsamt.
+
+Zudem wird bei jedem Klon der gesamte Speicherraum vervielfacht. Deswegen ist es sinnvoll, den Benutzer Gegenmaßnahmen wie die Limitierung der Anzahl von Prozessen im System, damit ein Prozess nicht die gesamte Systemressourcen aufzerren kann.
+
+Die Beschränkung kann in der "/etc/security/limits.conf" Datei Konfiguriert werden und hat folgende Syntax: <domain><type><item><value>
+
+Gegebenes Beispiel:
+#<domain>      <type>  <item>         <value>
+
+tux             hard   nproc           100
+guest           hard   nproc           2000
+
+wobei: nproc - max number of processes
+
+2.)
+Bei SIGTERM (Aufruf durch kill PID), wird das Signal an die entsprechende PID gesendet. Der Prozess kann mit dem SIgnal nun umgehen, wie es will. Wenn es in einer Dauerschleife hängen bleibt oder gerade im Wartezustand ist, dann bringt es oftmal sogar gar nichts. Manche Programme geben auch noch erstmal den Speicher frei, bevor sie sich schließen.
+
+Mehr Gewicht hat aber SIGKILL (Aufruf durch kill -9 PID), denn dann wird das Beeneden des Prozesses erzwungen.
+
+3.) Ein Prozess ist in seinem Programmablauf zu Beginn seiner Laufzeit in Grunde ein einziger Faden (Thread). 
+
+Will man einen parallel laufenden Prozess haben, muss man bisher mit dem "fork" Befehl einen weiteren Prozess erstellen werden. 
+Damit wird der gesamte Prozess mitsamt seines Speicherbereiches geklont (Bis auf die PID), was auch als schwergewichtige Prozesserzeugung genannt wird und sehr Ressourcenhungrig ist.
+
+Da man aber nicht immer den gesamten Speicherbereich Klonen will und/oder das Benutzten von "fork" manchmal unnötig Teuer ist, erstellt man statt neue Prozesse (fork) neue Fäden im Prozess, was auch als leichtgewichtige Prozesserzeugung genannt wird.
+Diese laufen parallel zu den anderen Fäden innerhalb des Prozesses, teilen sich aber gemeinsam bis auf den Stack den gesamten Speicher.
+
+Also: Ein Prozess ist gerade im Betrieb ein ausführender Programmablauf während ein Faden parallel zu anderen Fäden innerhalb eines Prozesses ablaufen.
+
+4.) 
+
+Vorteil: Prozesse haben unabhängig voneinander ihren eigenen Speicherbeich und verlaufen linear. Es gibt also keine parallälen Programmabläufe, die sich gegenseitig stören könnten/manipulieren.
+
+Nachteil: Prozesse benötigen im Gegensatz zu Fäden einen eigenen Speicherbeich, während Fäden sich einen Speicherbereich außer dem Stack teilen und somit Hardware-Ressourcen sparen. 
+          Außerdem ist die Verwendung echter Paralleliäten innerhalb eines Programmes mit Fäden deutlich einfacher als zwischen Prozessen.
+
+5.) 
+
+(a) Falsch. Beim Blockieren eines schwergewichtigen Prozesses werden alle anderen leichtgewichtigen Prozesse, die das selbe Prgramm ausführen, eben falls blockiert.
+
+(b) Richtig. Da Fäden Parallel verlaufen, können sie auf meheren CPUs laufen.
+
+(c) Falsch. Bei federgewichtigen Prozessen (Fiber oder auch User-Threads gennant) ist der Wechsel von einem Fiber zum anderem innerhalb des Userthreads unabhängig vom Kernel möglich, womit keinerlei Schedulingstrategien fest im Betriebssystem nötig sind und auch nicht existieren.
+
+(d) Falsch. Jeder Thread innerhalb eines Prozesses teilt sich (AUßER den Stack!!!) den Adressraum in einem Prozess.
+/*K
+*Systemaufrufe blockieren sich immer, z.b. 2 Threads die auf die Konsole schreiben
+*/
+(e) Falsch. User-Threads befinden sich im Userland und haben keinerlei Verbindung mit dem Kernel, außer der gesamte Prozess wird blockiert. 
+
+(f) Richtig. Siehe Grafik Seite 5-29 Vorlesungsfolien
+
+
+
+
+
+
+4.1.2) Scheduling
+
+1.)
+/*K
+*Jeder Prozess nur einmal, sonst wäre B auch nie dran!
+*/
++---+------------------------------+
+| A |--CCCIIII----CCCIIII----CCCIII|
+| B |-----CCCCCCIIIIICCCCCCIIIIICCC|
+| C |CCII-------CCII-------CCII----|
++---+------------------------------+
+
+2.)
+Ein Problem ist, dass längere Prozesse verhungern, weil sie eine längere CPU Burst Time haben und bei ständig auftretenden kürzeren Prozessen seltener dran sind.
+
+Ein weiteres Problem ist, dass große Prozesse, die länger brauchen auch alle CPU Bursts bekommen, jedoch kommen die kleinen Prozesse dadurch zu dem Zeitpunkt nicht ran, obwohl die eventuell nicht lange bräuchten.
